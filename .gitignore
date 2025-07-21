@@ -1,0 +1,24 @@
+# 환경 변수 파일
+.env
+
+# 설치 패키지, 바이너리
+*.deb
+
+# Python 관련 캐시 (있을 경우 대비)
+__pycache__/
+*.pyc
+
+# VSCode 설정 폴더 (있다면)
+.vscode/
+
+# macOS, Linux 시스템 파일
+.DS_Store
+Thumbs.db
+
+# 기타 로그나 임시 파일
+*.log
+*.tmp
+*.html
+
+# Python 가상 환경 무시
+.venv/
