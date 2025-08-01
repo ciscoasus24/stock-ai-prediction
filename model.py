@@ -47,7 +47,7 @@ def predict_price_gpt(news_summary, price_data):
         price_data=price_data
     )
 
-def get_news_urls(keyword="삼성전자", max_count=8):
+def get_news_urls(keyword, max_count=8):
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
@@ -60,7 +60,6 @@ def get_news_urls(keyword="삼성전자", max_count=8):
         print("❌ driver 생성 실패:", e)
 
     driver.get(f"https://search.naver.com/search.naver?where=news&query={keyword}")
-    #driver.get("https://www.naver.com")
     print("🔍 현재 URL:", driver.current_url)
     print("🔍 페이지 제목:", driver.title)
 
@@ -88,16 +87,7 @@ def get_news_urls(keyword="삼성전자", max_count=8):
 
     for a in soup.find_all("a", href=True):
         href = a["href"]
-        if not any(domain in href for domain in [
-            "www.newsis.com",           # 뉴시스
-            "www.yna.co.kr",            # 연합뉴스
-            "www.hankyung.com",         # 한국경제    
-            "www.mk.co.kr",             # 매일경제
-            "www.hani.co.kr",           # 한겨레
-            "www.khan.co.kr",           # 경향신문
-            "www.donga.com",            # 동아일보
-            "www.ohmynews.com",         # 오마이뉴스
-        ]):
+        if not any(domain in href for domain in news_articles_domain):
             continue
 
         # 언론사 도메인만 추출
@@ -145,5 +135,110 @@ def get_samsung_news_summary():
     #summary = summarize_articles_with_gpt(articles)
     #return summary
 
-print(get_news_urls())
-#print(get_samsung_news_summary())
+samsung_related_keywords = [
+    "삼성전자 반도체",
+    "삼성전자 파운드리",
+    "삼성전자 감산",
+    "삼성전자 수율",
+    "삼성전자 실적 전망",
+    "삼성전자 애플",
+    "삼성전자 TSMC",
+    "삼성전자 외국인 매수",
+    "삼성전자 목표주가",
+    "삼성전자 공급망",
+    "이재용"
+]
+
+news_articles_domain = [
+            "www.newsis.com",           # 뉴시스
+            "www.yna.co.kr",            # 연합뉴스
+            "www.hankyung.com",         # 한국경제    
+            "www.mk.co.kr",             # 매일경제
+            "www.hani.co.kr",           # 한겨레
+            "www.khan.co.kr",           # 경향신문
+            "www.donga.com",            # 동아일보
+            "www.ohmynews.com",         # 오마이뉴스
+        ]
+
+def classifier(urls):
+    handlers = {
+        "newsis": get_article_text_from_newsis,
+        "yna": get_article_text_from_yna,
+        "hani": get_article_text_from_hani,
+        "donga": get_article_text_from_donga,
+        "mk": get_article_text_from_mk,
+        "khan": get_article_text_from_khan,
+        "ohmynews": get_article_text_from_ohmynews,
+        "hankyung": get_article_text_from_hankyung,
+    }
+
+    for url in urls:
+        for domain, handler in handlers.items():
+            if domain in url:
+                return handler(url)
+
+
+def get_article_text_from_newsis(url):
+    print("from newsis")
+    return
+
+def get_article_text_from_yna(url):
+    print("from yna")
+    return
+
+def get_article_text_from_hani(url):
+    print("from hani")
+    return
+
+def get_article_text_from_donga(url):
+    print("from donga")
+    return
+
+def get_article_text_from_mk(url):
+    print("from mk")
+    return
+
+def get_article_text_from_khan(url):
+    print("from khan")
+    return
+
+def get_article_text_from_ohmynews(url):
+    print("from ohmynews")
+    return
+
+def get_article_text_from_hankyung(a):
+    print("from hankyung")
+    print(type(a))
+    print(a)
+    # ScraperAPI 요청
+    payload = {
+        'api_key': '1814c4b2082de44045d1d0af9243ab75',
+        'url': a,
+        'country_code': 'kr',
+        'device_type': 'desktop'
+    }
+    print(payload)
+    r = requests.get('https://api.scraperapi.com/', params=payload)
+
+    
+    # 응답 HTML 파싱
+    soup = BeautifulSoup(r.text, 'html.parser')
+
+    # 본문 컨테이너 추출
+    container = soup.select_one("#articletxt")
+    if not container:
+        return "❌ 기사 본문을 찾을 수 없음"
+
+    # 광고나 이미지 등 제거 (선택)
+    for ad in container.select(".ad-area-wrap, figure"):
+        ad.decompose()
+
+    # <br> 태그가 문단 경계니까 줄바꿈 유지해서 텍스트 추출
+    text = container.get_text(separator="\n", strip=True)
+    return text
+
+urls = get_news_urls("삼성전자")
+#a = "https://www.hankyung.com/article/202508015499g"
+#print(get_article_text_from_hankyung(a))
+#print(urls)
+print(classifier(urls))
