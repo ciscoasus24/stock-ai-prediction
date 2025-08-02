@@ -180,10 +180,49 @@ def classifier(urls):
 
 def get_article_text_from_newsis(url):
     print("from newsis")
-    return
+    # ScraperAPI 요청
+    payload = {
+        'api_key': '1814c4b2082de44045d1d0af9243ab75',
+        'url': url,
+        'country_code': 'kr',
+        'device_type': 'desktop'
+    }
+    r = requests.get('https://api.scraperapi.com/', params=payload)
+
+    # 응답 HTML 파싱
+    soup = BeautifulSoup(r.text, 'html.parser')
+
+    # 본문 컨테이너 추출
+    container = soup.select_one("article")
+    if not container:
+        return "❌ 기사 본문을 찾을 수 없음"
+
+    # <br> 태그가 문단 경계니까 줄바꿈 유지해서 텍스트 추출
+    text = container.get_text(separator="\n", strip=True)
+    return text
 
 def get_article_text_from_yna(url):
     print("from yna")
+    # ScraperAPI 요청
+    payload = {
+        'api_key': '1814c4b2082de44045d1d0af9243ab75',
+        'url': url,
+        'country_code': 'kr',
+        'device_type': 'desktop'
+    }
+    r = requests.get('https://api.scraperapi.com/', params=payload)
+
+    # 응답 HTML 파싱
+    soup = BeautifulSoup(r.text, 'html.parser')
+
+    # 본문 컨테이너 추출
+    container = soup.select_one(".story-news.article")
+    if not container:
+        return "❌ 기사 본문을 찾을 수 없음"
+
+    # <br> 태그가 문단 경계니까 줄바꿈 유지해서 텍스트 추출
+    text = container.get_text(separator="\n", strip=True)
+    return text
     return
 
 def get_article_text_from_hani(url):
@@ -206,18 +245,15 @@ def get_article_text_from_ohmynews(url):
     print("from ohmynews")
     return
 
-def get_article_text_from_hankyung(a):
+def get_article_text_from_hankyung(url):
     print("from hankyung")
-    print(type(a))
-    print(a)
     # ScraperAPI 요청
     payload = {
         'api_key': '1814c4b2082de44045d1d0af9243ab75',
-        'url': a,
+        'url': url,
         'country_code': 'kr',
         'device_type': 'desktop'
     }
-    print(payload)
     r = requests.get('https://api.scraperapi.com/', params=payload)
 
     
@@ -229,16 +265,13 @@ def get_article_text_from_hankyung(a):
     if not container:
         return "❌ 기사 본문을 찾을 수 없음"
 
-    # 광고나 이미지 등 제거 (선택)
-    for ad in container.select(".ad-area-wrap, figure"):
-        ad.decompose()
-
     # <br> 태그가 문단 경계니까 줄바꿈 유지해서 텍스트 추출
     text = container.get_text(separator="\n", strip=True)
     return text
 
 urls = get_news_urls("삼성전자")
-#a = "https://www.hankyung.com/article/202508015499g"
+a = "https://www.yna.co.kr/view/AKR20250801024300003?input=1195m"
 #print(get_article_text_from_hankyung(a))
-#print(urls)
-print(classifier(urls))
+print(urls)
+print(get_article_text_from_yna(a))
+#print(classifier(urls))
